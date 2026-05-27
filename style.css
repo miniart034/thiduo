@@ -1,0 +1,310 @@
+/* style.css */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background: #f5f5f5; 
+    line-height: 1.6;
+}
+
+.container { 
+    max-width: 600px; 
+    margin: auto; 
+    background: #fff; 
+    min-height: 100vh; 
+    padding-bottom: 80px;
+}
+
+/* 头部样式 */
+.header { 
+    background: linear-gradient(135deg, #FF5722, #FF9800); 
+    color: white; 
+    padding: 20px; 
+    text-align: center; 
+}
+
+.logo { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 50%; 
+    border: 3px solid white; 
+    margin-bottom: 10px;
+}
+
+.slogan { 
+    font-size: 12px; 
+    opacity: 0.9; 
+    margin-top: 5px;
+}
+
+#user-area { 
+    font-size: 12px; 
+    margin-top: 10px; 
+    background: rgba(255,255,255,0.2);
+    padding: 8px;
+    border-radius: 5px;
+}
+
+/* 登录区域 */
+#auth-section { 
+    padding: 15px; 
+    background: #fff; 
+    border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+#auth-section input { 
+    flex: 1; 
+    min-width: 120px;
+    padding: 8px; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+}
+
+#auth-section button { 
+    padding: 8px 12px; 
+    border: none; 
+    border-radius: 5px; 
+    background: #FF5722;
+    color: white;
+    cursor: pointer;
+}
+
+/* 选项卡 */
+.tab { 
+    display: flex; 
+    background: #fff; 
+    border-bottom: 1px solid #eee;
+}
+
+.tab-btn { 
+    flex: 1; 
+    padding: 12px; 
+    border: none; 
+    background: #eee; 
+    cursor: pointer; 
+    transition: all 0.3s;
+}
+
+.tab-btn.active { 
+    background: #FF5722; 
+    color: white; 
+    font-weight: bold;
+}
+
+/* 菜单项 */
+.menu-item { 
+    display: flex; 
+    padding: 15px; 
+    border-bottom: 1px solid #eee; 
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.menu-item:hover { 
+    background: #f9f9f9; 
+}
+
+.food-img { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 8px; 
+    margin-right: 15px; 
+    object-fit: cover; 
+}
+
+.food-info { 
+    flex: 1; 
+}
+
+.food-info strong { 
+    display: block; 
+    margin-bottom: 5px; 
+    color: #333;
+}
+
+.food-info p { 
+    font-size: 12px; 
+    color: #666; 
+    margin-bottom: 5px;
+}
+
+.price { 
+    color: #FF5722; 
+    font-weight: bold; 
+    font-size: 16px;
+}
+
+/* 购物车栏 */
+.cart-bar { 
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+    background: #FF5722; 
+    color: white; 
+    padding: 15px; 
+    display: flex; 
+    justify-content: space-between; 
+    font-size: 18px; 
+    font-weight: bold; 
+    cursor: pointer;
+    z-index: 100;
+}
+
+/* 弹窗样式 */
+.modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.5); 
+    justify-content: center; 
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.show { 
+    display: flex; 
+}
+
+.modal-content { 
+    background: white; 
+    width: 90%; 
+    max-width: 400px; 
+    padding: 20px; 
+    border-radius: 10px; 
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.detail-img { 
+    width: 100%; 
+    border-radius: 10px; 
+    margin-bottom: 15px;
+}
+
+.option-group { 
+    margin: 10px 0; 
+}
+
+.option-group label { 
+    margin-right: 10px; 
+    font-size: 14px;
+}
+
+.pay-btn { 
+    width: 100%; 
+    background: #04B431; 
+    color: white; 
+    padding: 15px; 
+    border: none; 
+    border-radius: 10px; 
+    margin-top: 15px; 
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.code-num { 
+    font-size: 48px; 
+    color: #FF5722; 
+    text-align: center; 
+    margin: 20px 0;
+    letter-spacing: 5px;
+}
+
+/* 后厨样式 */
+.admin-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 15px; 
+    background: #fff; 
+    border-bottom: 1px solid #eee;
+}
+
+.order-card { 
+    background: #FFF9E6; 
+    border-left: 5px solid #FF5722; 
+    padding: 15px; 
+    margin: 15px; 
+    border-radius: 8px;
+}
+
+.order-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.order-time { 
+    font-size: 12px; 
+    color: #666;
+}
+
+.action-btns { 
+    display: flex; 
+    gap: 5px; 
+    margin-top: 15px; 
+}
+
+.action-btns button { 
+    flex: 1; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* 报表样式 */
+.card { 
+    background: #f9f9f9; 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin: 15px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card h3 { 
+    color: #333; 
+    margin-bottom: 10px;
+}
+
+/* 积分兑换 */
+.section-title { 
+    padding: 10px 15px; 
+    background: #eee; 
+    font-weight: bold; 
+    margin-top: 10px;
+}
+
+.prize-item { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 10px 15px; 
+    border-bottom: 1px solid #eee; 
+}
+
+.prize-item button { 
+    padding: 5px 10px; 
+    background: #FF5722; 
+    color: white; 
+    border: none; 
+    border-radius: 3px; 
+    cursor: pointer;
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+    .container { padding-bottom: 70px; }
+    .cart-bar { padding: 12px; font-size: 16px; }
+    .action-btns { flex-direction: column; }
+    .action-btns button { margin-bottom: 5px; }
+}

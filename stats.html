@@ -1,0 +1,65 @@
+<!-- stats.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>营业报表 - 喜多.卤.小面</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>📊 营业数据统计</h1>
+    <div id="report"></div>
+</body>
+<script src="data.js"></script>
+<script>
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+    const today = new Date().toLocaleDateString();
+    const todaysOrders = orders.filter(o => o.time.includes(today));
+    
+    let revenue = 0;
+    let count = todaysOrders.length;
+    let deliveryCount = 0;
+    let productSales = {};
+    
+    todaysOrders.forEach(o => {
+        revenue += o.total;
+        if (o.customer.isDelivery) deliveryCount++;
+        o.items.forEach(item => {
+            productSales[item.name] = (productSales[item.name] || 0) + item.qty;
+        });
+    });
+    
+    // 排序热销产品
+    const hotProducts = Object.entries(productSales)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    document.getElementById("report").innerHTML = `
+        <div class="card">
+            <h3>今日日期</h3>
+            <p>${today}</p>
+        </div>
+        <div class="card">
+            <h3>总营业额</h3>
+            <p style="font-size:24px;color:#FF5722;">￥${revenue.toFixed(2)}</p>
+        </div>
+        <div class="card">
+            <h3>订单总数</h3>
+            <p>${count} 单</p>
+        </div>
+        <div class="card">
+            <h3>外卖订单</h3>
+            <p>${deliveryCount} 单</p>
+        </div>
+        <div class="card">
+            <h3>热销产品 TOP5</h3>
+            <ol>
+                ${hotProducts.map(([name, cnt]) => `<li>${name}: ${cnt}份</li>`).join('')}
+            </ol>
+        </div>
+    `;
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后厨管理 - 喜多.卤.小面</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>📋 后厨出餐屏</h1>
+    <div class="admin-header">
+        <span>喜多.卤.小面 (thindo)</span>
+        <a href="stats.html" target="_blank"><button>营业报表</button></a>
+    </div>
+    <div id="order-list"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+let lastOrderCount = 0;
+
+function loadOrders() {
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+    const pending = orders.filter(o => o.status === "等待制作");
+    
+    // 检测新订单
+    if (pending.length > lastOrderCount && lastOrderCount > 0) {
+        speakText("您有新的订单，请及时处理");
+    }
+    lastOrderCount = pending.length;
+    
+    document.getElementById("order-list").innerHTML = pending.map(order => `
+        <div class="order-card" id="order-${order.id}">
+            <div class="order-header">
+                <h2>取餐码: ${order.code}</h2>
+                <span class="order-time">${order.time}</span>
+            </div>
+            <p><strong>类型:</strong> ${order.customer.isDelivery ? '📦 外卖打包' : '🍽️ 到店用餐'}</p>
+            <p><strong>备注:</strong> ${order.customer.remark || '无'}</p>
+            <ul>
+                ${order.items.map(i => `<li>${i.name} x${i.qty} ${i.options ? '('+JSON.stringify(i.options)+')' : ''}</li>`).join('')}
+            </ul>
+            <p><strong>合计:</strong> ￥${order.total}</p>
+            <div class="action-btns">
+                <button onclick="speakCode('${order.code}')">🔊 喊号</button>
+                <button onclick="printOrder(${order.id})">🖨️ 打印</button>
+                <button onclick="completeOrder(${order.id})">✅ 出餐完成</button>
+            </div>
+        </div>`).join('');
+}
+
+// 语音播报取餐码
+function speakCode(code) {
+    speakText(`请取餐，取餐码 ${code}，请取餐`);
+}
+
+// 模拟打印
+function printOrder(id) {
+    const order = orders.find(o => o.id === id);
+    const printContent = `
+        喜多.卤.小面 (thindo)
+        =====================
+        取餐码: ${order.code}
+        时间: ${order.time}
+        类型: ${order.customer.isDelivery ? '外卖' : '堂食'}
+        ---------------------
+        ${order.items.map(i => `${i.name} x${i.qty}`).join('\n')}
+        ---------------------
+        合计: ￥${order.total}
+        谢谢惠顾！
+    `;
+    
+    const win = window.open('', '', 'width=400,height=600');
+    win.document.write(`<pre>${printContent}</pre>`);
+    win.print();
+}
+
+// 出餐完成
+function completeOrder(id) {
+    if (!confirm("确认出餐完成吗？")) return;
+    
+    let orders = JSON.parse(localStorage.getItem("orders"));
+    orders = orders.map(o => o.id === id ? {...o, status: "已完成"} : o);
+    localStorage.setItem("orders", JSON.stringify(orders));
+    
+    // 模拟给顾客发通知
+    speakText("您的订单已完成，请尽快取餐");
+    alert(`模拟短信已发送：您的取餐码订单已完成，请尽快取餐！`);
+    
+    loadOrders();
+}
+
+// 自动刷新
+setInterval(loadOrders, 3000);
+loadOrders();
+</script>
+</body>
+</html>

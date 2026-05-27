@@ -1,0 +1,292 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喜多.卤.小面 - 点餐</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <!-- 头部 -->
+    <div class="header">
+        <img src="https://via.placeholder.com/80/FF5722/FFFFFF?text=喜多" class="logo">
+        <h1>喜多.卤.小面</h1>
+        <p class="slogan">thindo · 恭喜发财 · 大吉大利</p>
+        <div id="user-area"></div>
+    </div>
+
+    <!-- 会员登录/注册 -->
+    <div id="auth-section" class="section">
+        <input id="phone-input" type="tel" placeholder="输入手机号" maxlength="11">
+        <button onclick="doLogin()">登录</button>
+        <button onclick="doRegister()">注册</button>
+        <button onclick="showRecharge()">充值</button>
+        <button onclick="logout()">退出</button>
+    </div>
+
+    <!-- 配送方式 -->
+    <div class="tab">
+        <button class="tab-btn active" onclick="switchTab('dinein')">到店用餐</button>
+        <button class="tab-btn" onclick="switchTab('delivery')">外卖打包(+2元)</button>
+    </div>
+
+    <!-- 积分兑换区 -->
+    <div class="section-title">🎁 积分兑换</div>
+    <div id="prize-list"></div>
+
+    <!-- 菜单 -->
+    <div id="menu"></div>
+
+    <!-- 购物车栏 -->
+    <div class="cart-bar" onclick="toggleCart()">
+        <span>🛒 购物车 (<span id="cart-count">0</span>)</span>
+        <span>¥ <span id="cart-total">0</span></span>
+    </div>
+</div>
+
+<!-- 产品详情弹窗 -->
+<div id="detail-modal" class="modal">
+    <div class="modal-content">
+        <img id="detail-img" class="detail-img">
+        <h2 id="detail-name"></h2>
+        <p id="detail-desc"></p>
+        <div id="detail-options"></div>
+        <textarea id="detail-remark" placeholder="特殊要求（如：少辣、多葱等）"></textarea>
+        <button onclick="addDetailToCart()">加入购物车</button>
+    </div>
+</div>
+
+<!-- 购物车弹窗 -->
+<div id="cart-modal" class="modal">
+    <div class="modal-content">
+        <h2>确认订单</h2>
+        <div id="cart-items"></div>
+        <div id="promotion-tip" class="tip"></div>
+        <button class="pay-btn" onclick="showPayment()">去支付</button>
+    </div>
+</div>
+
+<!-- 支付确认弹窗 -->
+<div id="payment-modal" class="modal">
+    <div class="modal-content payment-modal">
+        <h2>喜多.卤.小面</h2>
+        <p>请确认支付金额</p>
+        <h1 style="color:#FF5722;">￥<span id="pay-amount">0</span></h1>
+        <p style="font-size:12px;color:#999;">模拟微信支付环境</p>
+        <button class="pay-btn" onclick="confirmPay()">立即支付</button>
+    </div>
+</div>
+
+<!-- 取餐码弹窗 -->
+<div id="code-modal" class="modal">
+    <div class="modal-content code-modal">
+        <h2>下单成功！</h2>
+        <p>您的取餐码是</p>
+        <h1 class="code-num"></h1>
+        <p>凭此码到店取餐</p>
+        <button onclick="closeAllModals()">完成</button>
+    </div>
+</div>
+
+<!-- 充值弹窗 -->
+<div id="recharge-modal" class="modal">
+    <div class="modal-content">
+        <h2>会员充值</h2>
+        <p>充100送10元</p>
+        <button onclick="doRecharge(100)">充值100元</button>
+        <button onclick="doRecharge(50)">充值50元</button>
+    </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+let cart = [];
+let currentProduct = null;
+let currentMode = 'dinein';
+
+// 初始化页面
+function initPage() {
+    // 渲染用户信息
+    if (currentUser) {
+        document.getElementById("user-area").innerHTML = `
+            <span>${currentUser.phone}</span> | 
+            <span>余额:${currentUser.balance}元</span> | 
+            <span>积分:${currentUser.points}</span>`;
+    } else {
+        document.getElementById("user-area").innerHTML = `<span>未登录</span>`;
+    }
+    
+    // 渲染菜单
+    menu.forEach(item => {
+        document.getElementById("menu").innerHTML += `
+            <div class="menu-item" onclick="showDetail(${item.id})">
+                <img src="${item.img}" class="food-img">
+                <div class="food-info">
+                    <strong>${item.name}</strong>
+                    <p>${item.desc}</p>
+                    <span class="price">￥${item.price}</span>
+                </div>
+            </div>`;
+    });
+    
+    // 渲染奖品
+    prizes.forEach(p => {
+        document.getElementById("prize-list").innerHTML += `
+            <div class="prize-item">
+                ${p.name} (${p.points}积分)
+                <button onclick="exchangePrize(${p.id})">兑换</button>
+            </div>`;
+    });
+}
+initPage();
+
+// 显示产品详情
+function showDetail(id) {
+    currentProduct = menu.find(p => p.id === id);
+    document.getElementById("detail-img").src = currentProduct.img;
+    document.getElementById("detail-name").innerText = currentProduct.name;
+    document.getElementById("detail-desc").innerText = currentProduct.desc;
+    
+    // 渲染选项
+    let optionsHtml = '';
+    if (currentProduct.options) {
+        for (const [key, values] of Object.entries(currentProduct.options)) {
+            optionsHtml += `<div class="option-group"><label>${key}:</label>`;
+            values.forEach(value => {
+                optionsHtml += `<label><input type='radio' name='${key}' value='${value}'> ${value}</label>`;
+            });
+            optionsHtml += `</div>`;
+        }
+    }
+    document.getElementById("detail-options").innerHTML = optionsHtml;
+    document.getElementById("detail-modal").classList.add("show");
+}
+
+function addDetailToCart() {
+    if (!currentProduct) return;
+    
+    // 收集选项
+    const options = {};
+    if (currentProduct.options) {
+        for (const key of Object.keys(currentProduct.options)) {
+            const selected = document.querySelector(`input[name='${key}']:checked`);
+            if (selected) options[key] = selected.value;
+        }
+    }
+    
+    const remark = document.getElementById("detail-remark").value;
+    
+    cart.push({
+        ...currentProduct, 
+        qty: 1,
+        options: options,
+        remark: remark
+    });
+    
+    updateCartUI();
+    closeAllModals();
+}
+
+// 购物车逻辑
+function updateCartUI() {
+    document.getElementById("cart-count").innerText = cart.length;
+    let subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    let total = subtotal;
+    
+    // 促销提示
+    if (subtotal >= config.promotion.threshold) {
+        document.getElementById("promotion-tip").innerText = `已满足满${config.promotion.threshold}减${config.promotion.discount}`;
+        total -= config.promotion.discount;
+    }
+    
+    // 外卖打包费
+    if (currentMode === 'delivery') {
+        total += config.deliveryFee;
+    }
+    
+    document.getElementById("cart-total").innerText = total.toFixed(2);
+}
+
+function toggleCart() {
+    if (!currentUser) return alert("请先登录");
+    document.getElementById("cart-modal").classList.toggle("show");
+    document.getElementById("cart-items").innerHTML = cart.map(i => `<p>${i.name} x1 ${i.remark ? '('+i.remark+')' : ''}</p>`).join('');
+    updateCartUI();
+}
+
+// 支付流程
+function showPayment() {
+    if (cart.length === 0) return alert("购物车为空");
+    const subtotal = cart.reduce((s, i) => s + i.price, 0);
+    let total = subtotal;
+    if (subtotal >= config.promotion.threshold) total -= config.promotion.discount;
+    if (currentMode === 'delivery') total += config.deliveryFee;
+    
+    document.getElementById("pay-amount").innerText = total.toFixed(2);
+    document.getElementById("payment-modal").classList.add("show");
+}
+
+function confirmPay() {
+    const info = { 
+        phone: currentUser.phone, 
+        isDelivery: currentMode === 'delivery',
+        remark: ""
+    };
+    
+    const order = createOrder(cart, info);
+    
+    // 显示取餐码
+    document.querySelector("#code-modal .code-num").innerText = order.code;
+    
+    // 语音播报（模拟后厨通知）
+    setTimeout(() => {
+        speakText(`有新订单，取餐码 ${order.code}，请及时处理`);
+    }, 1000);
+    
+    closeAllModals();
+    document.getElementById("code-modal").classList.add("show");
+    
+    // 清空购物车
+    cart = [];
+    updateCartUI();
+}
+
+// 会员功能
+function doLogin() {
+    const phone = document.getElementById("phone-input").value;
+    login(phone);
+    location.reload();
+}
+
+function doRegister() {
+    const phone = document.getElementById("phone-input").value;
+    register(phone);
+}
+
+function showRecharge() {
+    if (!currentUser) return alert("请先登录");
+    document.getElementById("recharge-modal").classList.add("show");
+}
+
+function doRecharge(amount) {
+    recharge(amount);
+    closeAllModals();
+    location.reload();
+}
+
+// 工具函数
+function switchTab(mode) {
+    currentMode = mode;
+    updateCartUI();
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+}
+</script>
+</body>
+</html>
